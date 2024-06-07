@@ -9,26 +9,24 @@ import group.ea.problem.Problem;
 import group.ea.searchspace.SearchSpace;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
 
 
-//TEMP CLASS WILL BE FIXED ASAP
-
-//TODO
-//MERGE THIS AND NORMAL SA
-public class PermutationSA extends  Algorithm {
+public class PermutationSA extends Algorithm {
 
     Solution _slClone;
     double initTemp;
     double tempReduction;
+    double c; //cooling constant
 
 
     public PermutationSA(SearchSpace searchSpace, Problem problem) {
         super(searchSpace, problem);
         _sl = (Solution) problem;
         bestFitness = _sl.computeFitness();
-        initTemp = Math.pow(searchSpace.returnLength(),3);
-        tempReduction = 1-(1/500.0*searchSpace.returnLength());
+        initTemp = Math.pow(searchSpace.returnLength(),1);
+        tempReduction = 1 - (1 / ( 145.0 * Math.pow(searchSpace.returnLength(), 2)));
         currentTemp = initTemp;
         System.out.print("Construct done");
     }
@@ -50,7 +48,6 @@ public class PermutationSA extends  Algorithm {
         int offspringFitness = _sl.computeFitness();
 
         System.out.println(offspringFitness + " " + bestFitness);
-
 
 
         if (offspringFitness < bestFitness) {
@@ -75,6 +72,12 @@ public class PermutationSA extends  Algorithm {
             _slClone.getSolution().add(c);
         }
         _slClone.set_tsp(from.get_tsp());
-
     }
+
+    public void setC(double c) {
+        this.c = c;
+        tempReduction = 1 - (1 / (this.c * Math.pow(searchSpace.returnLength(), 2)));
+    }
+
+
 }

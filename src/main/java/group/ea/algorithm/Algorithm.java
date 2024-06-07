@@ -179,6 +179,9 @@ public abstract class Algorithm {
         lambda = a;
     }
 
+    public void setC(double c) {
+    }
+
     public void setUpdateRule(String rule){}
     public void setLocalSearch(boolean search){}
 

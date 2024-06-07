@@ -44,7 +44,7 @@ public class main extends Application {
         launch(args);
        //runSingle();
        // runSingle2();
-      //runExperimentTSP();
+        //runExperimentTSP();
         //RUNACOTEST();
 
 
@@ -111,15 +111,13 @@ public class main extends Application {
     private static void runExperimentTSP() {
         int iterations = 1;
         int perfectCount = 0;
-        int[] iterationsLength = {5000,10000,20000,40000,80000,160000,320000}; // Example lengths
-        int runsPerObservation = 100;
-        int [] variableValue = {2,4,6,8};
-        int [] mu_values = {2,4,6,8};
+        int[] iterationsLength = {100000}; // Example lengths
+        int runsPerObservation = 25;
+        int [] cValue = {120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170};
         Schedule newSchedule = new Schedule();
 
         List<DataPoint> dataPoints = new ArrayList<>();
-        for(int mu : variableValue){
-        for(int value : variableValue) {
+        for(int c : cValue) {
             int optimumAverage = 0;
             for (int length : iterationsLength) {
                 int totalFitness = 0;
@@ -130,9 +128,8 @@ public class main extends Application {
                     newSchedule.setTSPProblem("berlin52");
                     newSchedule.setSearchSpaceString("Permutations");
                     newSchedule.setProblemString("TSP");
-                    newSchedule.setMu(mu);
-                    newSchedule.setLambda(value);
-                    newSchedule.setAlgorithmString("(u+y) EA TSP");
+                    newSchedule.setAlgorithmString("Simulated Annealing TSP");
+                    newSchedule.setC(c);
                     newSchedule.setIterationBound(length);
                     newSchedule.setOptimumReached(true);
                     newSchedule.setUpAlgorithm();
@@ -145,14 +142,14 @@ public class main extends Application {
                     totalFitness += thisRunFitness;
                 }
                 dataPoints.add(new DataPoint(length, totalFitness / runsPerObservation));
-                saveDataToCSV("TSP_experimentmu+lambda2.csv", dataPoints);
-                //System.out.println("Done with length " + length + "mu and lambda value" + newSchedule.getAlgorithm().getMu() + " " + newSchedule.getAlgorithm().getLambda());
+                saveDataToCSV("TSP_SA.csv", dataPoints, c);
+                System.out.println("Done with length " + length + "c value " + c);
                 System.out.println(perfectCount);
                 if(perfectCount > 0){
                     System.out.println("Average iterations for perfect runs: " + optimumAverage / perfectCount);
                 }
             }
-        }}
+        }
 
         System.out.println("Experiment done");
 
@@ -299,6 +296,19 @@ public class main extends Application {
                 writer.append(dataPoint.getBitStringLength()).append(",")
                         .append(dataPoint.getIterations()).append("\n");
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void saveDataToCSV(String filename, List<DataPoint> dataPoints, double c) {
+        try (FileWriter writer = new FileWriter(filename)) {
+            writer.append("BitStringLength, Iterations, cooling constant\n");
+            for (DataPoint dataPoint : dataPoints) {
+                writer.append(dataPoint.getBitStringLength()).append(",")
+                        .append(dataPoint.getIterations()).append("\n");
+            }
+            writer.append(String.valueOf(c));
         } catch (IOException e) {
             e.printStackTrace();
         }

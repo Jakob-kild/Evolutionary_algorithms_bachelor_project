@@ -30,6 +30,7 @@ public class Schedule implements Cloneable {
     boolean tspBool = false;
     private ArrayList<StoppingCriterion> stoppingCriteria;
     private int mu;
+    private double _c;
     private int lambda;
     private String updateRule;
     private boolean localSearch;
@@ -263,6 +264,9 @@ public class Schedule implements Cloneable {
     }
     public void setLocalSearch(boolean search){
         this.localSearch = search;
+    }
+    public void setC(double c){
+        this._c = c;
     }
 
 
