@@ -72,7 +72,6 @@ public abstract class Algorithm {
     public Algorithm(SearchSpace searchSpace, Problem problem) {
         this.searchSpace = searchSpace;
         bitLength = searchSpace.length;
-        //sl = (Solution) problem;
         this.problem = problem;
         this.initialize();
         timer = new Timer();

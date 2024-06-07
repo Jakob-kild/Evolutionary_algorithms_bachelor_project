@@ -23,12 +23,15 @@ public class ACO extends Algorithm {
     protected double[][] heuristic;
     protected double[][] graph;
     protected Ant bestAnt;
+    protected Ant bestAntIteration;
     protected double fuzzyRandom = 0.00000;
     protected ArrayList<Ant> ants;
     int _generation;
     protected double bestInGeneration;
+    protected double bestInIteration;
     protected boolean improvedInGeneration = false;
     boolean flag;
+    String rule = "AS-update";
     int _foundCity;
     int gain = 0;
     int _depth = 20;
@@ -48,8 +51,8 @@ public class ACO extends Algorithm {
     @Override
     public void performSingleUpdate(int gen) {
         improvedInGeneration = false;
-
-
+        bestInIteration = Double.MAX_VALUE;
+        bestAntIteration = new Ant(dimension);
 
 
 
@@ -84,9 +87,6 @@ public class ACO extends Algorithm {
         updateEvaporation();
         updatePheromone();
 
-        if(generation % 10 == 0 && generation < 150){
-            System.out.println(bestAnt.getCost());
-        }
     }
 
     public void Ants() {
@@ -106,11 +106,18 @@ public class ACO extends Algorithm {
         for (Ant a : ants) {
             a.setCost(calculateAntCost(a.getTrailOfAnt()));
             functionEvaluations++;
-            if (a.getCost() < bestInGeneration - 2) {
-                copyFromTo(a, bestAnt);
-                bestInGeneration = a.getCost();
-                improvedInGeneration = true;
+
+            if(a.getCost() < bestAntIteration.getCost()){
+                copyFromTo(a, bestAntIteration);
+                bestInIteration = a.getCost();
+                if (a.getCost() < bestInIteration - 2) {
+                    copyFromTo(a, bestAnt);
+                    bestInGeneration = a.getCost();
+                    improvedInGeneration = true;
+                }
             }
+
+
         }
 
 
@@ -155,16 +162,33 @@ public class ACO extends Algorithm {
         }
     }
 
-    public void updatePheromone(){
-        if(_IBFlag){
-            // Using only the trail of the best ant, IB rule
-            updatePheromoneBEST(bestAnt);
-        }
-        else {
-            // Using the trail of all ants, standard rule
-            updatePheromoneALL();
+    public void updatePheromoneIB(){
+        double dTau = Q / bestAntIteration.getCost();
+        for (int i = 0; i < dimension; i++) {
+            int j = bestAntIteration.getTrailOfAnt()[i];
+            int k = bestAntIteration.getTrailOfAnt()[(i + 1) % dimension];
+            pheromone[j][k] += dTau;
+            pheromone[k][j] = pheromone[j][k]; // Ensure symmetry
         }
     }
+
+    public void updatePheromone(){
+        switch (rule){
+            case "AS-update":
+                updatePheromoneALL();
+                break;
+            case "best-so-far(BS)":
+                updatePheromoneBEST(bestAnt);
+                break;
+            case "Iteration Best (IB)":
+                updatePheromoneIB();
+                break;
+        }
+
+
+
+    }
+
 
 
 
@@ -367,16 +391,7 @@ public class ACO extends Algorithm {
     }
 
     public void setUpdateRule(String rule){
-
-        if (rule.equals("AS-update")){
-            setIBFlag(false);
-        }
-        else if (rule.equals("best-so-far(BS)")){
-            setIBFlag(true);
-        }
-        else if (rule.equals("Iteration Best (IB)")){
-            setIBFlag(false);
-        }
+        this.rule = rule;
     }
     public void setLocalSearch(boolean search){
         _localSearch = search;
